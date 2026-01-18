@@ -1,0 +1,20 @@
+module routing_unit #(
+    parameter WIDTH = 4 // Largura de bits configurável
+)(
+    input  [WIDTH-1:0] d0, d1, d2, d3, // Entradas de dados
+    input  [1:0]       sel,            // Seletor de função
+    output reg [WIDTH-1:0] y           // Saída roteada
+);
+
+    // Lógica combinacional para seleção de dados
+    always @(*) begin
+        case (sel)
+            2'b00:   y = d0;
+            2'b01:   y = d1;
+            2'b10:   y = d2;
+            2'b11:   y = d3;
+            default: y = {WIDTH{1'b0}}; // Prevenção de latches
+        endcase
+    end
+
+endmodule

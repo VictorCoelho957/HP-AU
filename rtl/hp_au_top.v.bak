@@ -1,0 +1,34 @@
+module hp_au_top #(
+    parameter WIDTH = 4
+)(
+    input  [WIDTH-1:0] a, b,
+    input  [1:0]       sel, // 00: Soma Bin, 01: Sub Bin, 10: Soma BCD
+    output [WIDTH-1:0] result,
+    output             cout
+);
+    wire [WIDTH-1:0] s_bin, s_bcd;
+    wire             cout_bin, cout_bcd;
+
+    // Instância do Núcleo Binário (Soma/Subtração)
+    binary_core #(.WIDTH(WIDTH)) bin_unit (
+        .a(a), .b(b), .sub(sel[0]), 
+        .s(s_bin), .cout(cout_bin)
+    );
+
+    // Instância do Núcleo BCD (Apenas para 4 bits neste estágio)
+    bcd_adder_core bcd_unit (
+        .a(a[3:0]), .b(b[3:0]), .cin(1'b0),
+        .s_bcd(s_bcd), .cout_bcd(cout_bcd)
+    );
+
+    // Unidade de Roteamento: Escolhe o resultado final
+    routing_unit #(.WIDTH(WIDTH)) mux_saida (
+        .d0(s_bin), .d1(s_bin), .d2(s_bcd), .d3({WIDTH{1'b0}}),
+        .sel(sel),
+        .y(result)
+    );
+
+    // Lógica simples para o carry de saída
+    assign cout = (sel[1]) ? cout_bcd : cout_bin;
+
+endmodule
