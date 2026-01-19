@@ -2,48 +2,39 @@ module hp_au_top #(
     parameter WIDTH = 4
 )(
     input  [WIDTH-1:0] a, b,
-    input  [1:0]       sel,
+    input  [2:0]       sel,    // [MODIFICADO] Agora são 3 bits!
     output [WIDTH-1:0] result
 );
 
-    // --- 1. Declaração de Fios ---
-    wire [WIDTH-1:0] s_bin;     // Fio existente (Ripple Carry)
-    wire [3:0]       s_bcd;     // Fio existente (BCD)
-    wire             cout_bcd;
-    
-    // [MODIFICAÇÃO]: Criamos fios novos para trazer o sinal do CLA para o Top Level.
-    // Sem isso, não teríamos como conectar a saída do módulo ao multiplexador.
-    wire [3:0]       s_cla;     
-    wire             cout_cla;  
+    // --- Fios Internos ---
+    wire [WIDTH-1:0] s_bin;     
+    wire [3:0]       s_bcd, s_cla;
+    wire             cout_bcd, cout_cla;
+    wire [3:0]       s_shift;   // Saída do Shifter
 
-    // --- Instâncias Existentes (Binário e BCD) ---
+    // --- Instâncias Matemáticas (Fases 2, 3, 4) ---
     binary_core #(.WIDTH(WIDTH)) bin_inst (.a(a), .b(b), .sub(sel[0]), .s(s_bin));
     bcd_adder_core bcd_inst (.a(a[3:0]), .b(b[3:0]), .cin(1'b0), .s_bcd(s_bcd), .cout_bcd(cout_bcd));
+    cla_4bit cla_inst (.a(a[3:0]), .b(b[3:0]), .cin(1'b0), .sum(s_cla), .cout(cout_cla), .Pg(), .Gg());
 
-    // --- 2. Instância do CLA (Fase 4) ---
-    // [MODIFICAÇÃO]: Aqui "soldamos" o chip CLA na placa mãe.
-    cla_4bit cla_inst (
-        .a(a[3:0]),      // Conectamos os 4 bits menos significativos da entrada A
-        .b(b[3:0]),      // Conectamos os 4 bits menos significativos da entrada B
-        .cin(1'b0),      // Carry in fixo em 0 (sem soma anterior)
-        .sum(s_cla),     // A saída calculada vai para o fio 's_cla'
-        .cout(cout_cla), // O carry vai para 'cout_cla'
-        .Pg(), .Gg()     // Deixamos em branco () pois não vamos usar cascateamento agora.
+    // --- Instância Shifter (Fase 5) ---
+    // Usamos os 2 bits menos significativos de 'b' para definir o quanto deslocar
+    barrel_shifter_4bit shift_inst (
+        .a(a[3:0]), 
+        .shift_amt(b[1:0]), 
+        .y(s_shift)
     );
 
-    // --- 3. Multiplexador Atualizado ---
-    routing_unit #(.WIDTH(WIDTH)) mux_inst (
-        .d0(s_bin),                        
-        .d1(s_bin),                        
-        .d2({ {(WIDTH-4){1'b0}}, s_bcd }), 
-        
-        // [MODIFICAÇÃO]: Preenchemos o slot '11' (d3) que estava vazio.
-        // { {(WIDTH-4){1'b0}}, s_cla } -> Isso é uma concatenação segura.
-        // Se WIDTH for 8, ele cria 4 zeros e junta com o s_cla (4 bits), totalizando 8.
-        // Isso evita erros de síntese se mudarmos o tamanho do processador.
-        .d3({ {(WIDTH-4){1'b0}}, s_cla }), 
-        
-        .sel(sel), 
-        .y(result)
-    );
+    // --- Roteamento Expandido (Mux 8x1) ---
+    // O Mux agora gerencia 8 entradas baseadas no 'sel' de 3 bits.
+    assign result = (sel == 3'b000) ? s_bin :                       // 0: Soma Lenta
+                    (sel == 3'b001) ? s_bin :                       // 1: Sub Lenta
+                    (sel == 3'b010) ? { {(WIDTH-4){1'b0}}, s_bcd } : // 2: BCD
+                    (sel == 3'b011) ? { {(WIDTH-4){1'b0}}, s_cla } : // 3: CLA
+                    (sel == 3'b100) ? (a & b) :                     // 4: AND (Lógica Pura)
+                    (sel == 3'b101) ? (a | b) :                     // 5: OR
+                    (sel == 3'b110) ? (a ^ b) :                     // 6: XOR
+                    (sel == 3'b111) ? { {(WIDTH-4){1'b0}}, s_shift } : // 7: Shifter
+                    {WIDTH{1'b0}};                                  // Default
+
 endmodule
