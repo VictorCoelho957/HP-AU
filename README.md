@@ -3,7 +3,7 @@
 [![Hardware Design](https://img.shields.io/badge/Hardware-Verilog_HDL-blue.svg)](https://github.com/VictorCoelho957/HP-AU)
 [![FPGA](https://img.shields.io/badge/FPGA-Cyclone_V-orange.svg)](https://www.intel.com/content/www/us/en/products/details/fpga/cyclone/v.html)
 
-Unidade Aritmética Parametrizada de alto desempenho, desenvolvida para aplicações em sistemas embarcados e controle inteligente (LabSECI/UFMA). O projeto foca em modularidade, otimização de caminho crítico e conformidade com padrões aritméticos industriais.
+Unidade Aritmética Parametrizada de alto desempenho. O projeto foca em modularidade, otimização de caminho crítico e conformidade com padrões aritméticos industriais.
 
 ## 🏗️ Arquitetura do Sistema
 
