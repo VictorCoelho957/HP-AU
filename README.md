@@ -1,3 +1,4 @@
+
 # HP-AU: High Performance Arithmetic Unit 
 ### Projeto de Aceleração de Hardware em Verilog
 
@@ -52,3 +53,37 @@ HP_AU/
 │   ├── fase5_shifter_wave.png
 │   └── ...
 └── README.md             # Documentação
+
+```
+
+## ⚡ Como Executar (Simulação)
+
+Este projeto foi validado utilizando **Intel ModelSim** e **Quartus Prime**.
+
+1. Compile os arquivos da pasta `rtl/`.
+2. Compile o testbench desejado da pasta `tb/`.
+3. Simule a unidade `hp_au_top_tb`.
+
+Exemplo de visualização esperada no console (Fase 6):
+
+```plaintext
+=== TESTE INTEGRADO FASE 6: MULTIPLICACAO ===
+[OK] Regressao AND funcionando
+[OK] MULT INTEGRADO: 3 * 3 = 9 (Slot 8 Ativo)
+[OK] MULT TRUNCAMENTO: 4 * 4 = 16 -> Saida 0
+
+```
+
+## 📚 Referências Bibliográficas
+
+* *Digital Design and Computer Architecture* - Harris & Harris.
+* *Materiais do Programa CI Digital (Softex/UEMA)* - Aulas 18, 19, 20 (Somadores) e Aula 12 (Fluxo RTL).
+* *Datasheets* e Manuais de Verilog IEEE 1364.
+
+---
+
+*Desenvolvido no contexto da Residência em TIC 41 - CI Digital.*
+
+```
+
+```
