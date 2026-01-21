@@ -148,6 +148,28 @@ Exemplo de visualização esperada no console (Fase 6):
 
 ```
 
+
+
+### 💎 Fase 07: Parametrização Total (IP Core Scalability)
+
+Nesta fase final, a HP-AU deixou de ser um design de largura fixa para se tornar um **IP Core Parametrizável**.
+
+#### 🛠️ Implementação de Hardware
+* **Generic Design:** Utilização de `parameter WIDTH` em todos os módulos (`rtl/`).
+* **Parameter Propagation:** O módulo de topo (`hp_au_top`) agora atua como um maestro, propagando a largura de barramento para os núcleos aritméticos e lógicos via instâncias nomeadas.
+* **Auto-Scaling:** O multiplicador e o somador se auto-ajustam durante a síntese, otimizando o uso de ALMs conforme a necessidade do projeto.
+
+#### ✅ Validação Final (The 8-bit Proof)
+Para validar a flexibilidade da arquitetura, realizamos um teste de estresse mudando o parâmetro global para **8 bits**:
+* **Cenário:** Multiplicação de $10 \times 10$.
+* **Resultado Obtido:** $100$ (`01100100_2`).
+* **Conclusão:** O hardware expandiu com sucesso. O truncamento que ocorria em 4 bits foi eliminado automaticamente pela reconfiguração do barramento, provando a robustez do design parametrizado.
+
+| Evidência Final | Arquivo |
+| :--- | :--- |
+| **Simulação 8-bits** | `docs/fase7/fase7_8bit_scaling_proof.png` |
+| **Waveform Parametrizada** | `docs/fase7/fase7_wave_8bit.png` |
+
 ## 📚 Referências Bibliográficas
 
 * *Digital Design and Computer Architecture* - Harris & Harris.
